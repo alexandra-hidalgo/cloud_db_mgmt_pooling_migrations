@@ -1,0 +1,47 @@
+from sqlalchemy import create_engine, inspect, Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class Patient(Base):
+    __tablename__ = 'Clients'
+
+    Client_ID = Column(Integer, primary_key=True)
+    First_Name = Column(String(50), nullable=False)
+    Last_Name = Column(String(50), nullable=False)
+    Date_of_Birth = Column(Date, nullable=False)
+    Gender = Column(String(10), nullable=False)
+    Contact_Number = Column(String(15))
+
+    records = relationship('TreatmentPlan', back_populates='Clients')
+
+class MedicalRecord(Base):
+    __tablename__ = 'Treatment_Plan'
+
+    Treatment_ID = Column(Integer, primary_key=True)
+    Client_ID = Column(Integer, ForeignKey('Client.id'), nullable=False)
+    Treatment_Name = Column(String(100), nullable=False)
+    Start_Date = Column(Date, nullable=False)
+    End_Date = Column(Date)
+    Description = Column(String(200))
+
+    clients = relationship('Clients', back_populates='Treatment_Plan')
+
+
+### Part 2 - initial sqlalchemy-engine to connect to db:
+
+engine = create_engine("mysql+pymysql://alexandra-migrations:Barranquillera22!@alexandra-migrations.mysql.database.azure.com/alexandra",
+                         connect_args={'ssl': {'ssl-mode': 'preferred'}},
+                         )
+
+## Test connection
+
+inspector = inspect(engine)
+inspector.get_table_names()
+
+
+### Part 3 - create the tables using sqlalchemy models, with no raw SQL required:
+
+Base.metadata.create_all(engine)
+
